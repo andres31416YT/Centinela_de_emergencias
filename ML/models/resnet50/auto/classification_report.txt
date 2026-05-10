@@ -1,0 +1,12 @@
+Classification Report: RESNET50 (auto)
+============================================================
+
+              precision    recall  f1-score   support
+
+        Fire       0.98      1.00      0.99       253
+      Normal       1.00      0.98      0.99       253
+       Smoke       1.00      1.00      1.00       253
+
+    accuracy                           0.99       759
+   macro avg       0.99      0.99      0.99       759
+weighted avg       0.99      0.99      0.99       759

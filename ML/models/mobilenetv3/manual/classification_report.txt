@@ -1,0 +1,12 @@
+Classification Report: MOBILENETV3 (manual)
+============================================================
+
+              precision    recall  f1-score   support
+
+        Fire       0.99      0.98      0.98       253
+      Normal       0.98      0.99      0.98       253
+       Smoke       1.00      1.00      1.00       253
+
+    accuracy                           0.99       759
+   macro avg       0.99      0.99      0.99       759
+weighted avg       0.99      0.99      0.99       759

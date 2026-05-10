@@ -1,0 +1,32 @@
+{
+  "model": "resnet50",
+  "tuning_mode": "optimal",
+  "best_epoch": 7,
+  "learning_rate": 0.001,
+  "test_accuracy": 0.9947,
+  "test_f1_weighted": 0.9947,
+  "test_precision_weighted": 0.9948,
+  "test_recall_weighted": 0.9947,
+  "test_loss": 0.009,
+  "train_time_epochs": 10,
+  "per_class_report": {
+    "Fire": {
+      "precision": 0.996,
+      "recall": 0.9881,
+      "f1-score": 0.9921,
+      "support": 253
+    },
+    "Normal": {
+      "precision": 0.9882,
+      "recall": 0.996,
+      "f1-score": 0.9921,
+      "support": 253
+    },
+    "Smoke": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 253
+    }
+  }
+}

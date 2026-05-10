@@ -1,0 +1,12 @@
+Classification Report: VIT_BASE (optimal)
+============================================================
+
+              precision    recall  f1-score   support
+
+        Fire       0.94      0.96      0.95       253
+      Normal       0.96      0.93      0.95       253
+       Smoke       0.99      1.00      0.99       253
+
+    accuracy                           0.96       759
+   macro avg       0.96      0.96      0.96       759
+weighted avg       0.96      0.96      0.96       759

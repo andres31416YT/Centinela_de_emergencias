@@ -1,0 +1,32 @@
+{
+  "model": "mobilenetv3",
+  "tuning_mode": "auto",
+  "best_epoch": 5,
+  "learning_rate": 0.001,
+  "test_accuracy": 0.9921,
+  "test_f1_weighted": 0.9921,
+  "test_precision_weighted": 0.9921,
+  "test_recall_weighted": 0.9921,
+  "test_loss": 0.023,
+  "train_time_epochs": 10,
+  "per_class_report": {
+    "Fire": {
+      "precision": 0.992,
+      "recall": 0.9842,
+      "f1-score": 0.9881,
+      "support": 253
+    },
+    "Normal": {
+      "precision": 0.9843,
+      "recall": 0.9921,
+      "f1-score": 0.9882,
+      "support": 253
+    },
+    "Smoke": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 253
+    }
+  }
+}
