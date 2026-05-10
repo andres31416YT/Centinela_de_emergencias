@@ -1,0 +1,20 @@
+\begin{table}[ht]
+\centering
+\caption{Comparative Benchmark of Forest Fire Detection Models}
+\label{tab:benchmark}
+\begin{tabular}{llccccc}
+\toprule
+Model & Tuning & \multicolumn{1}{c}{Accuracy} & \multicolumn{1}{c}{F1} & \multicolumn{1}{c}{Precision} & \multicolumn{1}{c}{Recall} & Epoch \\
+\midrule
+RESNET50 & auto & 99.34$\,$\% & 99.34$\,$\% & 99.35$\,$\% & 99.34$\,$\% & 3 \\
+RESNET50 & manual & 99.47$\,$\% & 99.47$\,$\% & 99.48$\,$\% & 99.47$\,$\% & 1 \\
+RESNET50 & optimal & 99.47$\,$\% & 99.47$\,$\% & 99.48$\,$\% & 99.47$\,$\% & 7 \\
+VIT-BASE & auto & 98.55$\,$\% & 98.55$\,$\% & 98.56$\,$\% & 98.55$\,$\% & 6 \\
+VIT-BASE & manual & 98.16$\,$\% & 98.15$\,$\% & 98.19$\,$\% & 98.16$\,$\% & 6 \\
+VIT-BASE & optimal & 96.44$\,$\% & 96.43$\,$\% & 96.45$\,$\% & 96.44$\,$\% & 6 \\
+MOBILENETV3 & auto & 99.21$\,$\% & 99.21$\,$\% & 99.21$\,$\% & 99.21$\,$\% & 5 \\
+MOBILENETV3 & manual & 98.95$\,$\% & 98.95$\,$\% & 98.95$\,$\% & 98.95$\,$\% & 7 \\
+MOBILENETV3 & optimal & 98.55$\,$\% & 98.55$\,$\% & 98.56$\,$\% & 98.55$\,$\% & 7 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,4 @@
+class,precision,recall,f1-score,support
+Fire,0.9879,0.9684,0.978,253
+Normal,0.969,0.9881,0.9785,253
+Smoke,1.0,1.0,1.0,253
