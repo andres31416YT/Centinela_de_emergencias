@@ -96,16 +96,11 @@ Allí puedes:
 
 ### 4. Configurar ngrok
 
-Crea un archivo `.env` a partir del ejemplo:
+Crea un archivo `.env` a partir del ejemplo y agrega tu token:
 
 ```bash
-cp .env.example .env
-```
-
-Edita `.env` y coloca tu token de ngrok:
-
-```
 NGROK_AUTHTOKEN=tu_token_aqui
+NGROK_REGION=us
 ```
 
 Para obtener tu token:
@@ -113,15 +108,26 @@ Para obtener tu token:
 2. Ve a https://dashboard.ngrok.com/get-started/your-authtoken
 3. Copia el token y pégalo en `.env`
 
-### 5. Exponer a internet con ngrok (para dron)
+### 5. Exponer a internet con ngrok (Docker)
 
 Ejecuta:
 
 ```bash
-ngrok http 8000
+./deploy_local.sh
 ```
 
-Esto te dará una URL pública tipo `https://xxxx.ngrok-free.app`.
+Esto levanta:
+- API en `http://localhost:8000`
+- Frontend en `http://localhost:8000`
+- ngrok en Docker
+
+Para ver la URL pública generada:
+
+```bash
+curl -s http://localhost:4040/api/tunnels | grep -oE 'https://[a-zA-Z0-9-]+\.ngrok(-free)?\.app'
+```
+
+O revisa el output del script `deploy_local.sh`.
 
 #### Configuración del dron/gateway
 
@@ -129,7 +135,7 @@ El dron debe enviar frames JPEG por POST o por WebSocket a la URL pública:
 
 **Opción A: POST HTTP** (recomendado para integración simple)
 ```
-POST https://xxxx.ngrok-free.app/predict
+POST https://<tu-url-ngrok>.ngrok-free.app/predict
 Content-Type: multipart/form-data
 <file: frame_jpeg>
 ```
@@ -149,7 +155,7 @@ Respuesta:
 
 **Opción B: WebSocket** (para stream continuo)
 ```
-ws://xxxx.ngrok-free.app/ws/stream
+ws://<tu-url-ngrok>.ngrok-free.app/ws/stream
 ```
 
 El dron envía frames JPEG como mensajes binarios por el WebSocket y recibe JSON por cada frame procesado.

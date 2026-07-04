@@ -58,25 +58,19 @@ echo "Frontend local: http://localhost:8000"
 echo "API docs:       http://localhost:8000/docs"
 echo "Health check:   http://localhost:8000/health"
 
-if [ -n "$NGROK_AUTHTOKEN" ] && [ "$NGROK_AUTHTOKEN" != "tu_token_aqui" ] && command -v ngrok &> /dev/null; then
+if [ -n "$NGROK_AUTHTOKEN" ] && [ "$NGROK_AUTHTOKEN" != "tu_token_aqui" ]; then
     echo ""
-    echo "=== Iniciando tunel ngrok ==="
-    echo "Region: ${NGROK_REGION:-us}"
-    ngrok config add-authtoken "$NGROK_AUTHTOKEN" >/dev/null 2>&1 || true
-    nohup ngrok http "$NGROK_CONTAINER_PORT" --region="${NGROK_REGION:-us}" > ngrok.log 2>&1 &
-    echo "ngrok iniciado. URL publica en unos segundos..."
-    echo "Ver URL: tail -f ngrok.log"
-elif [ -z "$NGROK_AUTHTOKEN" ] || [ "$NGROK_AUTHTOKEN" = "tu_token_aqui" ]; then
-    echo ""
-    echo "=== Para exponer a internet con ngrok ==="
-    echo "Edita .env y coloca tu NGROK_AUTHTOKEN"
-    echo "O ejecuta manualmente:"
-    echo "    ngrok http 8000"
+    echo "=== Tunel ngrok (Docker) ==="
+    PUBLIC_URL=$(curl -s http://localhost:4040/api/tunnels | grep -oE 'https://[a-zA-Z0-9-]+\.ngrok(-free)?\.app' | head -1)
+    if [ -n "$PUBLIC_URL" ]; then
+        echo "URL publica: $PUBLIC_URL"
+    else
+        echo "Revisa los logs: docker compose logs ngrok"
+    fi
 else
     echo ""
     echo "=== Para exponer a internet con ngrok ==="
-    echo "Instala ngrok y ejecuta:"
-    echo "    ngrok http 8000"
+    echo "Edita .env y coloca tu NGROK_AUTHTOKEN"
 fi
 
 echo ""

@@ -14,3 +14,24 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    networks:
+      - centinela
+
+  ngrok:
+    image: ngrok/ngrok:3
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - http
+      - api:${NGROK_CONTAINER_PORT:-8000}
+    depends_on:
+      - api
+    networks:
+      - centinela
+    ports:
+      - "4040:4040"
+
+networks:
+  centinela:
+    driver: bridge
