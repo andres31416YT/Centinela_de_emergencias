@@ -80,7 +80,15 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillStyle = data.class === 'Fire' ? '#dc2626' : data.class === 'Smoke' ? '#f59e0b' : '#22c55e';
+        if (data.class === 'Fire') {
+            ctx.fillStyle = '#dc2626';
+        } else if (data.class === 'Smoke') {
+            ctx.fillStyle = '#f59e0b';
+        } else if (data.class === 'Uncertain') {
+            ctx.fillStyle = '#94a3b8';
+        } else {
+            ctx.fillStyle = '#22c55e';
+        }
         ctx.fillText(`${data.class}: ${(data.confidence * 100).toFixed(1)}%`, 20, 40);
 
         if (data.class === 'Fire') {

@@ -7,6 +7,7 @@ from torch import nn
 
 MODEL_PATH = os.getenv("MODEL_PATH", "ML/models/resnet50/optimal/best_model.pt")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+FIRE_CONFIDENCE_THRESHOLD = float(os.getenv("FIRE_CONFIDENCE_THRESHOLD", "0.75"))
 
 preprocess = transforms.Compose([
     transforms.ToPILImage(),
@@ -95,9 +96,13 @@ def predict_frame(model, frame):
     logits = model(input_tensor)
     probs = torch.nn.functional.softmax(logits, dim=1)[0]
     conf, idx = torch.max(probs, 0)
+    predicted_class = CLASS_NAMES[idx.item()]
+
+    if conf.item() < FIRE_CONFIDENCE_THRESHOLD:
+        predicted_class = "Uncertain"
 
     return {
-        "class": CLASS_NAMES[idx.item()],
+        "class": predicted_class,
         "confidence": round(conf.item(), 4),
         "all": {CLASS_NAMES[i]: round(probs[i].item(), 4) for i in range(len(CLASS_NAMES))}
     }
