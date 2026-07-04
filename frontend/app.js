@@ -8,7 +8,8 @@
     const fpsEl = document.getElementById('fps');
     const lastPredictionEl = document.getElementById('lastPrediction');
 
-    const WS_URL = `ws://${location.host}/ws/stream`;
+    const WS_PROTO = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const WS_URL = `${WS_PROTO}//${location.host}/ws/stream`;
     let ws = null;
     let streaming = false;
     let alertCount = 0;
