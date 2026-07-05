@@ -1,0 +1,57 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    volumes:
+      - ./ML/models:/app/ML/models:ro
+      - ./backend/app:/app/app:ro
+      - ./frontend:/app/frontend:ro
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - centinela
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.1
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - centinela
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.1
+    restart: unless-stopped
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zookeeper
+    networks:
+      - centinela
+
+  ngrok:
+    image: ngrok/ngrok:3
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - http
+      - api:${NGROK_CONTAINER_PORT:-8000}
+    depends_on:
+      - api
+    networks:
+      - centinela
+    ports:
+      - "4040:4040"
+
+networks:
+  centinela:
+    driver: bridge

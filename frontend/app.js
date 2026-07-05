@@ -1,0 +1,162 @@
+(function () {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('overlay');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const alertsEl = document.getElementById('alerts');
+    const alertCountEl = document.getElementById('alertCount');
+    const fpsEl = document.getElementById('fps');
+    const lastPredictionEl = document.getElementById('lastPrediction');
+
+    const WS_PROTO = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const WS_URL = `${WS_PROTO}//${location.host}/ws/stream`;
+    let ws = null;
+    let streaming = false;
+    let alertCount = 0;
+    let lastFrameTime = performance.now();
+    let frameCount = 0;
+
+    function connectWebSocket() {
+        ws = new WebSocket(WS_URL);
+        ws.binaryType = 'arraybuffer';
+
+        ws.onopen = () => {
+            statusEl.textContent = 'Conectado';
+            statusEl.classList.add('connected');
+            streaming = true;
+            sendFrame();
+        };
+
+        ws.onclose = () => {
+            statusEl.textContent = 'Desconectado';
+            statusEl.classList.remove('connected');
+            streaming = false;
+            if (video.srcObject) {
+                setTimeout(connectWebSocket, 2000);
+            }
+        };
+
+        ws.onerror = () => {
+            statusEl.textContent = 'Error de conexión';
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.error) return;
+                drawPrediction(data);
+                updateStats(data);
+                if (data.class === 'Fire') {
+                    addAlert(data);
+                } else if (data.class === 'Smoke' && data.confidence >= 0.37) {
+                    addAlert(data);
+                }
+            } catch (e) {
+                console.error('Error parsing message:', e);
+            }
+        };
+    }
+
+    function sendFrame() {
+        if (!streaming || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+        if (video.readyState >= 2) {
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            try {
+                canvas.toBlob((blob) => {
+                    if (blob && ws.readyState === WebSocket.OPEN) {
+                        const size = blob.size;
+                        blob.arrayBuffer().then((buf) => {
+                            ws.send(buf);
+                            console.log('[WS] sent frame bytes=', size, 'readyState=', ws.readyState);
+                        });
+                    }
+                }, 'image/jpeg', 0.8);
+            } catch (e) {
+                console.error('[WS] capture error', e);
+            }
+        } else {
+            console.warn('[WS] video not ready readyState=', video.readyState);
+        }
+
+        setTimeout(sendFrame, 100);
+    }
+
+    function drawPrediction(data) {
+        ctx.fillStyle = 'transparent';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = 'bold 24px sans-serif';
+        if (data.class === 'Fire') {
+            ctx.fillStyle = '#dc2626';
+        } else if (data.class === 'Smoke') {
+            ctx.fillStyle = '#f59e0b';
+        } else if (data.class === 'Uncertain') {
+            ctx.fillStyle = '#94a3b8';
+        } else {
+            ctx.fillStyle = '#22c55e';
+        }
+        ctx.fillText(`${data.class}: ${(data.confidence * 100).toFixed(1)}%`, 20, 40);
+
+        if (data.class === 'Fire') {
+            statusEl.classList.add('alert');
+            setTimeout(() => statusEl.classList.remove('alert'), 1000);
+        }
+    }
+
+    function updateStats(data) {
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFrameTime >= 1000) {
+            fpsEl.textContent = `FPS: ${frameCount}`;
+            frameCount = 0;
+            lastFrameTime = now;
+        }
+        lastPredictionEl.textContent = `Última predicción: ${data.class} (${(data.confidence * 100).toFixed(1)}%)`;
+    }
+
+    function addAlert(data) {
+        const div = document.createElement('div');
+        div.className = `alert-item ${data.class.toLowerCase()}`;
+        const time = new Date().toLocaleTimeString();
+        div.innerHTML = `<span>${data.class} detectado - Confianza: ${(data.confidence * 100).toFixed(1)}%</span><span class="timestamp">${time}</span>`;
+        alertsEl.prepend(div);
+        alertCount++;
+        alertCountEl.textContent = alertCount;
+
+        while (alertsEl.children.length > 50) {
+            alertsEl.removeChild(alertsEl.lastChild);
+        }
+    }
+
+    document.getElementById('btnCamera').addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+            video.srcObject = stream;
+            if (!ws || ws.readyState === WebSocket.CLOSED) {
+                connectWebSocket();
+            }
+        } catch (e) {
+            alert('No se pudo acceder a la cámara local: ' + e.message);
+        }
+    });
+
+    document.getElementById('btnStop').addEventListener('click', () => {
+        if (ws) ws.close();
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+        streaming = false;
+        statusEl.textContent = 'Detenido';
+        statusEl.classList.remove('connected');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+})();

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centinela de Emergencias - Fire Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Centinela de Emergencias</h1>
+            <p class="subtitle">Detección de incendios en tiempo real desde dron</p>
+        </header>
+
+        <div class="video-wrapper">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="overlay"></canvas>
+            <div id="status" class="status-badge">Desconectado</div>
+        </div>
+
+        <div class="controls">
+            <button id="btnCamera" class="btn btn-primary">Usar Cámara Local</button>
+            <button id="btnStop" class="btn btn-danger">Detener</button>
+            <div class="stats">
+                <span id="fps">FPS: --</span>
+                <span id="lastPrediction">Última predicción: --</span>
+            </div>
+        </div>
+
+        <div class="alerts-panel">
+            <h2>Alertas <span id="alertCount" class="badge">0</span></h2>
+            <div id="alerts"></div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
