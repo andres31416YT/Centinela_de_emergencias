@@ -31,7 +31,9 @@
             statusEl.textContent = 'Desconectado';
             statusEl.classList.remove('connected');
             streaming = false;
-            setTimeout(connectWebSocket, 2000);
+            if (video.srcObject) {
+                setTimeout(connectWebSocket, 2000);
+            }
         };
 
         ws.onerror = () => {
@@ -44,7 +46,9 @@
                 if (data.error) return;
                 drawPrediction(data);
                 updateStats(data);
-                if (data.class === 'Fire' || data.class === 'Smoke') {
+                if (data.class === 'Fire') {
+                    addAlert(data);
+                } else if (data.class === 'Smoke' && data.confidence >= 0.37) {
                     addAlert(data);
                 }
             } catch (e) {
@@ -64,12 +68,18 @@
             try {
                 canvas.toBlob((blob) => {
                     if (blob && ws.readyState === WebSocket.OPEN) {
-                        blob.arrayBuffer().then((buf) => ws.send(buf));
+                        const size = blob.size;
+                        blob.arrayBuffer().then((buf) => {
+                            ws.send(buf);
+                            console.log('[WS] sent frame bytes=', size, 'readyState=', ws.readyState);
+                        });
                     }
                 }, 'image/jpeg', 0.8);
             } catch (e) {
-                // Canvas tainted or not ready
+                console.error('[WS] capture error', e);
             }
+        } else {
+            console.warn('[WS] video not ready readyState=', video.readyState);
         }
 
         setTimeout(sendFrame, 100);
@@ -149,5 +159,4 @@
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    connectWebSocket();
 })();

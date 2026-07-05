@@ -7,7 +7,9 @@ from torch import nn
 
 MODEL_PATH = os.getenv("MODEL_PATH", "ML/models/resnet50/optimal/best_model.pt")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-FIRE_CONFIDENCE_THRESHOLD = float(os.getenv("FIRE_CONFIDENCE_THRESHOLD", "0.75"))
+FIRE_CONFIDENCE_THRESHOLD = float(os.getenv("FIRE_CONFIDENCE_THRESHOLD", "0.35"))
+SMOKE_CONFIDENCE_THRESHOLD = float(os.getenv("SMOKE_CONFIDENCE_THRESHOLD", "0.37"))
+UNCERTAIN_GAP_THRESHOLD = float(os.getenv("UNCERTAIN_GAP_THRESHOLD", "0.25"))
 
 preprocess = transforms.Compose([
     transforms.ToPILImage(),
@@ -97,12 +99,27 @@ def predict_frame(model, frame):
     probs = torch.nn.functional.softmax(logits, dim=1)[0]
     conf, idx = torch.max(probs, 0)
     predicted_class = CLASS_NAMES[idx.item()]
+    all_probs = {CLASS_NAMES[i]: float(probs[i].item()) for i in range(len(CLASS_NAMES))}
 
-    if conf.item() < FIRE_CONFIDENCE_THRESHOLD:
+    sorted_probs = sorted(all_probs.items(), key=lambda x: x[1], reverse=True)
+    first_name, first_conf = sorted_probs[0]
+    second_name, second_conf = sorted_probs[1]
+
+    predicted_class = first_name
+    if first_name == "Smoke":
+        if first_conf >= SMOKE_CONFIDENCE_THRESHOLD:
+            predicted_class = "Smoke"
+        elif first_conf >= FIRE_CONFIDENCE_THRESHOLD:
+            predicted_class = "Smoke"
+        else:
+            predicted_class = "Uncertain"
+    elif first_conf >= FIRE_CONFIDENCE_THRESHOLD:
+        predicted_class = first_name
+    else:
         predicted_class = "Uncertain"
 
     return {
         "class": predicted_class,
-        "confidence": round(conf.item(), 4),
-        "all": {CLASS_NAMES[i]: round(probs[i].item(), 4) for i in range(len(CLASS_NAMES))}
+        "confidence": round(first_conf, 4),
+        "all": {k: round(v, 4) for k, v in all_probs.items()}
     }
